@@ -64,7 +64,7 @@ type Target struct {
 	second bool
 }
 
-func worker(jobs <-chan []int, results chan<- Target) {
+func worker(jobs <-chan []int, results chan<- Target, updates chan<- int) {
 	for levels := range jobs {
 		if is_safe1(levels) {
 			results <- Target{
@@ -77,26 +77,43 @@ func worker(jobs <-chan []int, results chan<- Target) {
 				second: true,
 			}
 		}
+		updates <- 1
 	}
 }
 
 func main() {
-	f, _ := os.Open("./input.txt")
+	f, _ := os.Open("./bigboy.txt")
 	defer f.Close()
 
 	numsafe1 := 0
 	numsafe2 := 0
 
-	numWorkers := 16
+	numWorkers := 8
 	results := make(chan Target)
 	jobs := make(chan []int)
+
+	counter := 0
+	updates := make(chan int)
+	done := make(chan bool)
 	var wg sync.WaitGroup
+
+	go func() {
+		for {
+			select {
+			case value := <-updates:
+				counter += value
+				fmt.Printf("\rfinished %d jobs", counter)
+			case <-done:
+				return
+			}
+		}
+	}()
 
 	for i := 1; i <= numWorkers; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			worker(jobs, results)
+			worker(jobs, results, updates)
 		}()
 	}
 
@@ -122,6 +139,8 @@ func main() {
 
 	wg.Wait()
 	close(results)
+	close(done)
+	fmt.Println("\ndone!")
 
 	fmt.Println(numsafe1)
 	fmt.Println(numsafe2)
