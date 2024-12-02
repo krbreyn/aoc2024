@@ -24,25 +24,17 @@ func is_safe1(levels []int) bool {
 	for i, val := range levels {
 		if i > 0 {
 			prev = levels[i-1]
+			diff := val - prev
 
-			if prev == val {
+			if diff == 0 || diff > 3 || diff < -3 {
 				return false
 			}
-
-			if val > prev {
-				if val-prev > 3 {
-					return false
-				}
+			if val > prev && !up {
 				up = true
 			}
-
-			if prev > val {
-				if prev-val > 3 {
-					return false
-				}
+			if prev > val && !down {
 				down = true
 			}
-
 			if down && up {
 				return false
 			}
