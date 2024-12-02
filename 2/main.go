@@ -82,7 +82,7 @@ func worker(jobs <-chan []int, results chan<- Target, updates chan<- int) {
 }
 
 func main() {
-	f, _ := os.Open("./bigboy.txt")
+	f, _ := os.Open("./input.txt")
 	defer f.Close()
 
 	numsafe1 := 0
