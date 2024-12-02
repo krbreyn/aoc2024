@@ -29,10 +29,10 @@ func is_safe1(levels []int) bool {
 			if diff == 0 || diff > 3 || diff < -3 {
 				return false
 			}
-			if val > prev && !up {
+			if !up && val > prev {
 				up = true
 			}
-			if prev > val && !down {
+			if !down && prev > val {
 				down = true
 			}
 			if down && up {
