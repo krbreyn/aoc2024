@@ -8,14 +8,8 @@ import (
 	"strconv"
 )
 
-type NumPair struct {
-	x      int
-	y      int
-	isDont bool
-}
-
 func main() {
-	f, _ := os.Open("./bigboy.txt")
+	f, _ := os.Open("./input.txt")
 	defer f.Close()
 
 	pattern := `mul\((\d+),(\d+)\)|do\(\)|don't\(\)`
@@ -23,7 +17,8 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 
-	var pairs []NumPair
+	var multotal int
+	var dototal int
 	isDont := false
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -37,19 +32,14 @@ func main() {
 			} else if len(match) == 3 {
 				x, _ := strconv.Atoi(match[1])
 				y, _ := strconv.Atoi(match[2])
-				pairs = append(pairs, NumPair{x: x, y: y, isDont: isDont})
+				val := x * y
+				multotal += val
+				if !isDont {
+					dototal += val
+				}
 			}
 		}
 	}
 
-	var multotal int
-	var dototal int
-	for _, pair := range pairs {
-		temp := pair.x * pair.y
-		multotal += temp
-		if !pair.isDont {
-			dototal += temp
-		}
-	}
 	fmt.Println(multotal, dototal)
 }
