@@ -4,12 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 )
 
 func convert_levels(in []string) (out []int) {
+	out = make([]int, 0, len(in))
 	for _, val := range in {
 		i, _ := strconv.Atoi(val)
 		out = append(out, i)
@@ -44,7 +46,7 @@ func is_safe1(levels []int) bool {
 }
 
 func is_safe2(levels []int) bool {
-	var new_levels []int
+	var new_levels = make([]int, 0, len(levels)-1)
 	for j := range len(levels) {
 		new_levels = new_levels[:0]
 		for i, val := range levels {
@@ -65,36 +67,51 @@ type Target struct {
 }
 
 func worker(jobs <-chan []int, results chan<- Target, updates chan<- int) {
+	batch := make([][]int, 0, 100)
 	for levels := range jobs {
-		if is_safe1(levels) {
-			results <- Target{
-				first:  true,
-				second: true,
+		batch = append(batch, levels)
+		if len(batch) == cap(batch) {
+			for _, b := range batch {
+				processJob(b, results, updates)
 			}
-		} else if is_safe2(levels) {
-			results <- Target{
-				first:  false,
-				second: true,
-			}
+			batch = batch[:0]
 		}
-		updates <- 1
+	}
+	//finish remaining jobs
+	for _, b := range batch {
+		processJob(b, results, updates)
 	}
 }
 
+func processJob(levels []int, results chan<- Target, updates chan<- int) {
+	if is_safe1(levels) {
+		results <- Target{
+			first:  true,
+			second: true,
+		}
+	} else if is_safe2(levels) {
+		results <- Target{
+			first:  false,
+			second: true,
+		}
+	}
+	updates <- 1
+}
+
 func main() {
-	f, _ := os.Open("./input.txt")
+	f, _ := os.Open("./bigboy.txt")
 	defer f.Close()
 
 	numsafe1 := 0
 	numsafe2 := 0
 
-	numWorkers := 8
-	results := make(chan Target)
-	jobs := make(chan []int)
+	numWorkers := runtime.NumCPU()
+	jobs := make(chan []int, 1000)
+	results := make(chan Target, 1000)
 
 	counter := 0
-	updates := make(chan int)
-	done := make(chan bool)
+	updates := make(chan int, 1000)
+	done := make(chan bool, 1000)
 	var wg sync.WaitGroup
 
 	go func() {
