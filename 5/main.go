@@ -77,6 +77,37 @@ func (bm beforesMap) brute_force_updates(report []string) []string {
 	return report
 }
 
+func (bm beforesMap) order(report, new_report []string) ([]string, []string) {
+	var left_overs []string
+
+	for _, val := range report {
+		canPlace := true
+		for _, before := range bm[val] {
+			if slices.Contains(report, before) && !slices.Contains(new_report, before) {
+				canPlace = false
+			}
+		}
+		if canPlace {
+			new_report = append(new_report, val)
+		} else {
+			left_overs = append(left_overs, val)
+		}
+	}
+
+	return new_report, left_overs
+}
+
+func (bm beforesMap) order_updates(report []string) []string {
+	new_report := make([]string, 0, len(report))
+
+	new_report, left_overs := bm.order(report, new_report)
+	for len(new_report) != len(report) {
+		new_report, left_overs = bm.order(left_overs, new_report)
+	}
+
+	return new_report
+}
+
 func count_middles(reports [][]string) int {
 	var count int
 
@@ -102,14 +133,11 @@ func main() {
 	valid_reports, invalid_reports := befores_map.process_reports(scanner)
 
 	newly_valid_reports := make([][]string, 0, len(invalid_reports))
-	for i, report := range invalid_reports {
-		newly_valid_reports = append(newly_valid_reports, befores_map.brute_force_updates(report))
-		fmt.Println("brute forced", i, "out of", len(invalid_reports))
+	for _, report := range invalid_reports {
+		newly_valid_reports = append(newly_valid_reports, befores_map.order_updates(report))
 	}
 
 	silver := count_middles(valid_reports)
-	gold := count_middles(newly_valid_reports) + silver
-
+	gold := count_middles(newly_valid_reports)
 	fmt.Println(silver, gold)
-
 }
