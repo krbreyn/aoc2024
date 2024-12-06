@@ -7,8 +7,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-
-	"math/rand"
 )
 
 type beforesMap map[string][]string
@@ -66,15 +64,6 @@ func (bm beforesMap) validate_report(fields []string) bool {
 	}
 
 	return failed
-}
-
-func (bm beforesMap) brute_force_updates(report []string) []string {
-	for bm.validate_report(report) {
-		rand.Shuffle(len(report), func(i, j int) {
-			report[i], report[j] = report[j], report[i]
-		})
-	}
-	return report
 }
 
 func (bm beforesMap) order(report, new_report []string) ([]string, []string) {
