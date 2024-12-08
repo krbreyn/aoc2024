@@ -72,7 +72,8 @@ func silver(pos guardPos, board []string) int {
 	for !hasLeftBoard {
 		for !hasHitHash {
 			check := peek(pos, dir)
-			if check.x >= len(board) || check.y >= len(board[check.x]) {
+			if check.x >= len(board) || check.x < 0 ||
+				check.y >= len(board[check.x]) || check.y < 0 {
 				hasLeftBoard = true
 				break
 			}
