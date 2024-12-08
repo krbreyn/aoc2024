@@ -56,10 +56,6 @@ func main() {
 		}
 	}
 	fmt.Println(gold)
-
-	//the heuristic is simply checking if its touched hashes its already touched before
-	//a certain amount of times
-
 }
 
 func silver(pos guardPos, board []string) int {
