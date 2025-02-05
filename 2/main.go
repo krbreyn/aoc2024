@@ -66,6 +66,8 @@ type Target struct {
 	second bool
 }
 
+// TODO remove this worker junk, i was just learning go and wanted to do cool stuff
+
 func worker(jobs <-chan []int, results chan<- Target, updates chan<- int) {
 	batch := make([][]int, 0, 100)
 	for levels := range jobs {
